@@ -1,13 +1,68 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <title>N.P.A.T</title>
-    <link rel="stylesheet" href="/frontend/style.css">
-    <link rel="/home" method="GET">
+  <meta charset="UTF-8">
+  <title>N.P.A.T Game</title>
+  <link rel="stylesheet" href="style.css">
 </head>
 <body>
-    <link rel="/home" method="POST">
-    <input type="text" name="name" placeholder="Name">
-    <input type="text" name="place" placeholder="Place">
+  <h1>N.P.A.T</h1>
+  <div id="letterDisplay" style="font-size:24px; font-weight:bold;">Loading letter...</div>
+
+  <form id="gameForm">
+    <input type="text" name="name" placeholder="Name" required>
+    <input type="text" name="place" placeholder="Place" required>
+    <input type="text" name="animal" placeholder="Animal" required>
+    <input type="text" name="thing" placeholder="Thing" required>
+    <button type="submit">Submit</button>
+  </form>
+
+  <div id="result" style="margin-top:20px;"></div>
+
+  <script>
+    const letterDiv = document.getElementById("letterDisplay");
+    const form = document.getElementById("gameForm");
+    const resultDiv = document.getElementById("result");
+
+    // Fetch current letter from server
+    function fetchLetter() {
+      fetch("/letter")
+        .then(res => res.text())
+        .then(letter => letterDiv.textContent = `Your letter: ${letter}`);
+    }
+    
+   function fetchLetter() {
+      fetch("/letter")
+      .then(res => res.text())
+      .then(letter => {
+      letterDiv.textContent = `Your letter: ${letter}`;
+
+      // Softer pop
+      letterDiv.classList.add("letter-update");
+      setTimeout(() => letterDiv.classList.remove("letter-update"), 400);
+    });
+}
+
+
+    fetchLetter(); // initial fetch
+
+    // Handle form submission via AJAX
+    form.addEventListener("submit", e => {
+      e.preventDefault(); // prevent page reload
+      const data = Object.fromEntries(new FormData(form));
+
+      fetch("/submit", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(data)
+      })
+      .then(res => res.text())
+      .then(html => {
+        resultDiv.innerHTML = html;
+        form.reset();
+        fetchLetter(); // update to new letter
+      });
+    });
+  </script>
 </body>
 </html>
